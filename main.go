@@ -1,15 +1,28 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
-	"os"
+	"strings"
 )
 
 func main() {
-	args := os.Args[1:]
+	port := flag.String("p", "8081", "Inbound port")
+
+	if !strings.HasPrefix(*port, ":") {
+		*port = ":" + *port
+	}
+
+	certFile := flag.String("cert", "", "certificate file name")
+	keyFile := flag.String("key", "", "certificate key file name")
+
+	flag.Parse()
+	log.Println("Port:", *port)
+	log.Println("Certificate filename:", *certFile)
+	log.Println("Certificate key filename:", *keyFile)
 	http.HandleFunc("/metadata", GetJson)
-	err := http.ListenAndServeTLS(":8081", args[0], args[1], nil)
+	err := http.ListenAndServeTLS(*port, *certFile, *keyFile, nil)
 	if err != nil {
 		log.Fatal("Server error: ", err)
 	}
